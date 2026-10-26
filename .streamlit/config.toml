@@ -1,0 +1,20 @@
+[theme]
+base = "light"
+primaryColor = "#47805E"
+backgroundColor = "#F7F3EA"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#1F2933"
+borderColor = "#D3DED8"
+showWidgetBorder = true
+baseRadius = "0.6rem"
+headingFontWeights = [700, 600]
+headingFontSizes = ["2.4rem", "1.6rem", "1.25rem"]
+dataframeHeaderBackgroundColor = "#E8F0EA"
+dataframeBorderColor = "#5E7466"
+dataframeHeaderTextColor = "#000000"
+
+[theme.sidebar]
+backgroundColor = "#E8F0EA"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#1F2933"
+borderColor = "#B5CCBC"

@@ -1,0 +1,11 @@
+# Daftar library aplikasi web.
+# PENTING: samakan versi scikit-learn dengan versi yang dipakai saat melatih model
+# (lihat catatan_versi.txt di folder eksperimen_clustering), lalu ganti baris di bawah.
+streamlit
+pandas
+numpy
+scikit-learn
+shap
+matplotlib
+joblib
+openpyxl
