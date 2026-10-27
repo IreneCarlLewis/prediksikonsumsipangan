@@ -1,20 +1,20 @@
 [theme]
 base = "light"
-primaryColor = "#47805E"
+primaryColor = "#77542E"
 backgroundColor = "#F7F3EA"
 secondaryBackgroundColor = "#FFFFFF"
-textColor = "#1F2933"
-borderColor = "#D3DED8"
+textColor = "#2E2318"
+borderColor = "#E6D6BC"
 showWidgetBorder = true
 baseRadius = "0.6rem"
 headingFontWeights = [700, 600]
 headingFontSizes = ["2.4rem", "1.6rem", "1.25rem"]
-dataframeHeaderBackgroundColor = "#E8F0EA"
-dataframeBorderColor = "#5E7466"
-dataframeHeaderTextColor = "#000000"
+dataframeHeaderBackgroundColor = "#F3E6D0"
+dataframeBorderColor = "#B59670"
+dataframeHeaderTextColor = "#2E2318"
 
 [theme.sidebar]
-backgroundColor = "#E8F0EA"
+backgroundColor = "#F1E4CC"
 secondaryBackgroundColor = "#FFFFFF"
-textColor = "#1F2933"
-borderColor = "#B5CCBC"
+textColor = "#2E2318"
+borderColor = "#E0BD8A"
