@@ -179,13 +179,13 @@ def baca_shap_global():
 
 @st.cache_resource
 def muat_clustering():
-    scaler = joblib.load(FOLDER_MODEL_UTAMA / "kmeans" / "scaler_clustering.joblib")
-    kmeans = joblib.load(FOLDER_MODEL_UTAMA / "kmeans" / "model_clustering.joblib")
+    scaler = joblib.load(FOLDER_MODEL / "scaler_clustering.joblib")
+    kmeans = joblib.load(FOLDER_MODEL / "model_clustering.joblib")
     return scaler, kmeans
 
 @st.cache_resource
 def muat_rf(klaster, target):
-    return joblib.load(FOLDER_MODEL_UTAMA / "randomforest" / f"rf_cluster{klaster}_{target}.joblib")
+    return joblib.load(FOLDER_MODEL / f"rf_cluster{klaster}_{target}.joblib")
 
 
 
