@@ -23,9 +23,20 @@ contoh = {"Nilai tengah seluruh kabupaten/kota": data_2025[FAKTOR].median()}
 for k in [0, 1, 2]:
     bagian = data_2025[data_2025["cluster"] == k]
     contoh[f"Wilayah khas {nama_kelompok(k)}"] = bagian[FAKTOR].median()
+contoh["Kosongkan (isi sendiri)"] = pd.Series(0.0, index=FAKTOR)   # semua isian 0
 
 with st.container(border=True, key="kartu_input"):
-    pilihan = st.selectbox("Gunakan nilai contoh", list(contoh.keys()),
+    # Fungsi tombol Reset: hapus isian form dan hasil prediksi
+    def reset_form():
+        for kunci in list(st.session_state.keys()):
+            if kunci.startswith(("kp_", "ipm_", "p0_", "tpt_")):
+                del st.session_state[kunci]
+        for kunci in ["input", "klaster", "baris_fitur", "prediksi"]:
+            st.session_state.pop(kunci, None)
+        st.session_state["pilihan_contoh"] = "Kosongkan (isi sendiri)"
+
+
+    pilihan = st.selectbox("Gunakan nilai contoh", list(contoh.keys()), key="pilihan_contoh",
                         help="Nilai contoh adalah nilai tengah data tahun 2025, bukan data "
                                 "kabupaten/kota tertentu. Setelah dipilih, setiap nilai tetap dapat "
                                 "diubah sesuai kondisi wilayah yang ingin disimulasikan.")
@@ -56,8 +67,9 @@ with st.container(border=True, key="kartu_input"):
         st.caption("Keempat faktor saling berkaitan, misalnya wilayah dengan kemiskinan rendah umumnya "
                 "memiliki IPM yang lebih tinggi. Isi kombinasi nilai yang wajar agar hasil prediksi "
                 "lebih dapat dipercaya.")
-        ditekan = st.form_submit_button("Prediksi", type="primary", icon=":material/calculate:")
-
+        with st.container(horizontal=True):
+            ditekan = st.form_submit_button("Prediksi", type="primary", icon=":material/calculate:")
+            st.form_submit_button("Reset", icon=":material/restart_alt:", on_click=reset_form)
 # ---------- Proses saat tombol ditekan ----------
 if ditekan:
     nilai = {"Nilai_kp": kp, "Nilai_ipm": ipm, "P0": p0, "Nilai_tpt": tpt}
