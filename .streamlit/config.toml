@@ -18,3 +18,8 @@ backgroundColor = "#F1E4CC"
 secondaryBackgroundColor = "#FFFFFF"
 textColor = "#2E2318"
 borderColor = "#E0BD8A"
+
+
+
+[client]
+showErrorDetails = "none"
