@@ -76,7 +76,7 @@ with st.container(border=True, key="grafik"):
     ax.invert_yaxis()                                              # pangan pertama di atas
     ax.axvline(0, color="#374151", linewidth=0.8)                  # garis nol
     ax.set_xlabel("R²")
-    ax.set_title(f"R² Random Forest vs Regresi Linear Berganda — {nama_kelompok(klaster)}")
+    ax.set_title(f"R² Random Forest vs Regresi Linear Berganda\n{nama_kelompok(klaster)}")
     ax.legend(loc="lower right", fontsize=7)
     gaya_grafik(ax)
     st.pyplot(fig)

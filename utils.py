@@ -48,7 +48,9 @@ WARNA_FAKTOR = {"Nilai_ipm": "#2E7BD6", "P0": "#E8683A", "Nilai_kp": "#1EAD7E",
                 "Nilai_tpt": "#EBA40C", "Tahun": "#A3A3A3"}
 
 # Nomor cluster di model (0, 1, 2) -> nama yang ditampilkan
-SINGKATAN_CLUSTER = {0: "Kepadatan Rendah", 1: "Padat Penduduk", 2: "Kepadatan Sangat Rendah"}
+SINGKATAN_CLUSTER = {0: "Kepadatan Sedang, Kemiskinan Sedang",
+                     1: "Kepadatan Tinggi, Kemiskinan Rendah",
+                     2: "Kepadatan Rendah, Kemiskinan Tinggi"}
 
 def nama_kelompok(klaster):
     return f"Kelompok Wilayah {klaster + 1} ({SINGKATAN_CLUSTER[klaster]})"
@@ -57,13 +59,19 @@ def nama_kelompok(klaster):
 PERIODE = "per orang per minggu"
 
 KETERANGAN_KELOMPOK = {
-    0: "Wilayah berkepadatan rendah dengan kesejahteraan menengah. Kelompok terbesar, sebagian "
-       "besar kabupaten (contoh: Banyuwangi, Sumedang, Soppeng).",
-    1: "Wilayah padat dengan kesejahteraan tinggi. Umumnya kota dan kabupaten di sekitar kota "
-       "besar (contoh: Kota Semarang, Kota Bekasi, Sidoarjo).",
-    2: "Wilayah berkepadatan sangat rendah dengan kesejahteraan rendah. Persentase penduduk "
-       "miskin tinggi dan IPM rendah, sebagian besar di Papua, NTT, dan Maluku "
-       "(contoh: Asmat, Sumba Barat, Kepulauan Aru).",
+    0: "Wilayah dengan kondisi menengah. Penduduknya tidak terlalu padat dan tidak terlalu jarang. "
+       "Kualitas hidup (kesehatan, pendidikan, dan daya beli), jumlah penduduk miskin, dan angka "
+       "pengangguran umumnya berada di tengah-tengah, mirip dengan kebanyakan kabupaten/kota di "
+       "Indonesia. Ini kelompok terbesar (380 kabupaten/kota) dan hampir semuanya berupa kabupaten "
+       "(contoh: Banyuwangi, Sumedang, Soppeng).",
+    1: "Wilayah yang paling padat penduduknya dan sebagian besar berupa kota (86 kabupaten/kota). "
+       "Dibandingkan dua kelompok lain, kualitas hidupnya paling baik dan penduduk miskinnya paling "
+       "sedikit. Namun, angka penganggurannya justru paling tinggi, sehingga pengangguran yang tinggi "
+       "tidak selalu berarti wilayahnya miskin (contoh: Kota Semarang, Kota Bekasi, Sidoarjo).",
+    2: "Wilayah yang penduduknya paling jarang dan seluruhnya berupa kabupaten (48 kabupaten). "
+       "Dibandingkan dua kelompok lain, kualitas hidupnya paling rendah dan penduduk miskinnya paling "
+       "banyak. Angka penganggurannya paling rendah, tetapi bukan berarti kondisi ekonominya paling "
+       "baik (contoh: Asmat, Sumba Barat, Kepulauan Aru).",
 }
 
 
@@ -226,7 +234,7 @@ def tabel_kelompok():
     for k in [0, 1, 2]:
         bagian = terbaru[terbaru["cluster"] == k]
         baris.append({"Kelompok": nama_kelompok(k),
-                      "Gambaran": KETERANGAN_KELOMPOK[k],
+                    #   "Gambaran": KETERANGAN_KELOMPOK[k],
                       "Jumlah kab/kota": data[data["cluster"] == k]["Kabupaten/Kota"].nunique(),
                       "Kepadatan": bagian["Nilai_kp"].median(),
                       "TPT (%)": bagian["Nilai_tpt"].median(),
@@ -238,10 +246,10 @@ def tabel_kelompok():
 def penjelasan_kelompok_wilayah():
     with st.expander("Apa itu Kelompok Wilayah?"):
         st.markdown("Ke-514 kabupaten/kota dikelompokkan menjadi tiga kelompok wilayah berdasarkan "
-                    "kemiripan keempat faktor sosial ekonominya (metode K-Means). Setiap kelompok "
-                    "memiliki model prediksi sendiri, karena pola konsumsi di wilayah perkotaan "
-                    "berbeda dengan wilayah perdesaan atau wilayah tertinggal. Angka pada tabel "
-                    "adalah nilai tengah (median) tahun 2025.")
+            "kemiripan keempat faktor sosial ekonominya (metode K-Means). Setiap kelompok "
+            "memiliki model prediksi sendiri yang belajar dari data anggota kelompoknya.")
+        st.markdown("\n".join(f"- **{nama_kelompok(k)}**: {KETERANGAN_KELOMPOK[k]}" for k in [0, 1, 2]))
+        st.caption("Angka pada tabel adalah nilai tengah (median) tahun 2025.")
         st.dataframe(tabel_kelompok(), hide_index=True, width="stretch",
                      column_config={"Kepadatan": st.column_config.NumberColumn(format="%.0f"),
                                     "TPT (%)": st.column_config.NumberColumn(format="%.2f"),
