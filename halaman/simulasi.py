@@ -70,7 +70,7 @@ with st.form("form_input", border=True):
                "lebih dapat dipercaya.")
     with st.container(horizontal=True):
         ditekan = st.form_submit_button("Prediksi", type="primary", icon=":material/calculate:")
-        st.form_submit_button("Reset", icon=":material/restart_alt:", on_click=reset_form)
+        st.form_submit_button("Kosongkan Input", icon=":material/restart_alt:", on_click=reset_form)
 
 # ---------- Proses saat tombol ditekan ----------
 if ditekan:
