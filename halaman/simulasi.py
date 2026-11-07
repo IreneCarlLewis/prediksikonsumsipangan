@@ -23,7 +23,7 @@ contoh = {"Nilai tengah seluruh kabupaten/kota": data_2025[FAKTOR].median()}
 for k in [0, 1, 2]:
     bagian = data_2025[data_2025["cluster"] == k]
     contoh[f"Wilayah khas {nama_kelompok(k)}"] = bagian[FAKTOR].median()
-contoh["Kosongkan (isi sendiri)"] = pd.Series(0.0, index=FAKTOR)   # semua isian 0
+contoh["Kosongkan (isi sendiri)"] = pd.Series(None, index=FAKTOR, dtype="float")   # semua isian kosong
 
 with st.container(border=True, key="kartu_input"):
     # Fungsi tombol Reset: hapus isian form dan hasil prediksi
@@ -34,6 +34,8 @@ with st.container(border=True, key="kartu_input"):
         for kunci in ["input", "klaster", "baris_fitur", "prediksi"]:
             st.session_state.pop(kunci, None)
         st.session_state["pilihan_contoh"] = "Kosongkan (isi sendiri)"
+                # Nomor ini naik setiap tombol ditekan, supaya kotak isian selalu dibuat ulang dalam keadaan kosong
+        st.session_state["nomor_kosongkan"] = st.session_state.get("nomor_kosongkan", 0) + 1
 
 
     pilihan = st.selectbox("Gunakan nilai contoh", list(contoh.keys()), key="pilihan_contoh",
@@ -41,26 +43,32 @@ with st.container(border=True, key="kartu_input"):
                                 "kabupaten/kota tertentu. Setelah dipilih, setiap nilai tetap dapat "
                                 "diubah sesuai kondisi wilayah yang ingin disimulasikan.")
     nilai_contoh = contoh[pilihan].round(2)
+    nomor = st.session_state.get("nomor_kosongkan", 0)
+
+    
+    def nilai_awal(fitur):
+        # Kotak dibiarkan kosong (None) untuk pilihan "Kosongkan (isi sendiri)"
+        return None if pd.isna(nilai_contoh[fitur]) else float(nilai_contoh[fitur])
 
 # ---------- Form input ----------
 with st.form("form_input", border=True):
     st.caption("Gunakan **titik (.)** sebagai pemisah desimal, contoh: 8.74 (bukan 8,74).")
     kiri, kanan = st.columns(2)
     kp = kiri.number_input(NAMA_FITUR_AWAM["Nilai_kp"],
-                           value=float(nilai_contoh["Nilai_kp"]), format="%.2f",
-                           help=INFO_FAKTOR["Nilai_kp"]["apa"], key=f"kp_{pilihan}")
+                           value=float(nilai_contoh["Nilai_kp"]), format="%.2f", placeholder="Isi sendiri",
+                           help=INFO_FAKTOR["Nilai_kp"]["apa"], key=f"kp_{pilihan}_{nomor}")
     kiri.caption(f"Rentang data: {teks_rentang('Nilai_kp')}")
     ipm = kanan.number_input(NAMA_FITUR_AWAM["Nilai_ipm"],
-                             value=float(nilai_contoh["Nilai_ipm"]), format="%.2f",
-                             help=INFO_FAKTOR["Nilai_ipm"]["apa"], key=f"ipm_{pilihan}")
+                             value=float(nilai_contoh["Nilai_ipm"]), format="%.2f", placeholder="Isi sendiri",
+                             help=INFO_FAKTOR["Nilai_ipm"]["apa"], key=f"ipm_{pilihan}_{nomor}")
     kanan.caption(f"Rentang data: {teks_rentang('Nilai_ipm')}")
     p0 = kiri.number_input(NAMA_FITUR_AWAM["P0"],
-                           value=float(nilai_contoh["P0"]), format="%.2f",
-                           help=INFO_FAKTOR["P0"]["apa"], key=f"p0_{pilihan}")
+                           value=float(nilai_contoh["P0"]), format="%.2f", placeholder="Isi sendiri",
+                           help=INFO_FAKTOR["P0"]["apa"], key=f"p0_{pilihan}_{nomor}")
     kiri.caption(f"Rentang data: {teks_rentang('P0')}")
     tpt = kanan.number_input(NAMA_FITUR_AWAM["Nilai_tpt"],
-                             value=float(nilai_contoh["Nilai_tpt"]), format="%.2f",
-                             help=INFO_FAKTOR["Nilai_tpt"]["apa"], key=f"tpt_{pilihan}")
+                             value=float(nilai_contoh["Nilai_tpt"]), format="%.2f", placeholder="Isi sendiri",
+                             help=INFO_FAKTOR["Nilai_tpt"]["apa"], key=f"tpt_{pilihan}_{nomor}")
     kanan.caption(f"Rentang data: {teks_rentang('Nilai_tpt')}")
     st.selectbox("Tahun acuan", [TAHUN_ACUAN], disabled=True,
                  help="Tahun dikunci pada 2025 (tahun data terbaru), sehingga hasil menggambarkan "
@@ -70,20 +78,27 @@ with st.form("form_input", border=True):
                "lebih dapat dipercaya.")
     with st.container(horizontal=True):
         ditekan = st.form_submit_button("Prediksi", type="primary", icon=":material/calculate:")
-        st.form_submit_button("Kosongkan Input", icon=":material/restart_alt:", on_click=reset_form)
+        st.form_submit_button("Reset", icon=":material/restart_alt:", on_click=reset_form)
 
 # ---------- Proses saat tombol ditekan ----------
 if ditekan:
     # Cek isian dulu sebelum diprediksi
     kesalahan = []
-    if kp <= 0 or kp > 100000:
-        kesalahan.append("Kepadatan penduduk harus lebih dari 0 dan paling besar 100.000 jiwa/km².")
-    if ipm <= 0 or ipm > 100:
-        kesalahan.append("IPM harus lebih dari 0 dan paling besar 100.")
-    if p0 < 0 or p0 > 100:
-        kesalahan.append("Persentase penduduk miskin harus antara 0 dan 100%.")
-    if tpt < 0 or tpt > 100:
-        kesalahan.append("Tingkat pengangguran harus antara 0 dan 100%.")
+    # Nama kotak, aturan nilai, dan cara mengecek aturannya
+    aturan = {
+        "Nilai_kp": ("Kepadatan penduduk", "harus lebih dari 0 dan paling besar 100.000 jiwa/km²",
+                     lambda v: 0 < v <= 100000),
+        "Nilai_ipm": ("IPM", "harus lebih dari 0 dan paling besar 100", lambda v: 0 < v <= 100),
+        "P0": ("Persentase penduduk miskin", "harus antara 0 dan 100%", lambda v: 0 < v <= 100),
+        "Nilai_tpt": ("Tingkat pengangguran", "harus antara 0 dan 100%", lambda v: 0 < v <= 100),
+    }
+    isian = {"Nilai_kp": kp, "Nilai_ipm": ipm, "P0": p0, "Nilai_tpt": tpt}
+    for fitur, nilai_isian in isian.items():
+        nama, syarat, sesuai = aturan[fitur]
+        if nilai_isian is None:
+            kesalahan.append(f"{nama} belum diisi. Nilainya {syarat}.")
+        elif not sesuai(nilai_isian):
+            kesalahan.append(f"{nama} {syarat}.")
 
     if kesalahan:
         # Tampilkan pesan error dan hapus hasil lama supaya tidak membingungkan
