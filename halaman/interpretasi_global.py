@@ -95,7 +95,7 @@ with st.container(border=True, key="kartu_tujuan"):
     plt.close(fig)
 
     # Narasi persentase kontribusi (bahasa awam)
-    pilih = persen.loc[target].sort_values(ascending=False)    # 5 faktor pangan terpilih, besar ke kecil
+    pilih = persen.loc[target].sort_values(ascending=False) # 5 faktor pangan terpilih, besar ke kecil
     utama = pilih.index[0]   
     
     st.caption("Persentase dipakai agar jenis pangan dengan satuan berbeda (kg, butir, liter, gram) "
@@ -121,8 +121,8 @@ with st.container(border=True, key="kartu_tujuan"):
         teks += (f"\nArtinya, {NAMA_FAKTOR_AWAM[utama]} memberi kontribusi terbesar pada perkiraan "
                  f"konsumsi {nama_pangan}.\n\n")
 
-    juara = persen.idxmax(axis=1)                              # faktor terbesar di setiap pangan
-    sering = juara.value_counts().index[0]                     # faktor yang paling sering terbesar
+    juara = persen.idxmax(axis=1) # faktor terbesar di setiap pangan
+    sering = juara.value_counts().index[0] # faktor yang paling sering terbesar
     jumlah = juara.value_counts().iloc[0]
     contoh = [NAMA_PANGAN[t].lower() for t in juara[juara == sering].index][:3]   # maks. 3 contoh
     if sering == "Tahun":

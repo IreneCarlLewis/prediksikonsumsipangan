@@ -2,7 +2,7 @@ import streamlit as st
 from utils import FAKTOR, INFO_FAKTOR, NAMA_PANGAN, SATUAN, TARGET, baca_data_panel
 
 
-# ---------- Kepala halaman: judul + tujuan aplikasi ----------
+# Header halaman: judul + tujuan aplikasi
 with st.container(key="kepala_beranda"):
     st.title("Prediksi Konsumsi Pangan Wilayah")
     st.markdown("Aplikasi ini bertujuan memberikan gambaran prediksi rata-rata konsumsi per kapita 12 "
@@ -11,7 +11,7 @@ with st.container(key="kepala_beranda"):
     if st.button("Mulai Simulasi", icon=":material/arrow_forward:", key="mulai_atas"):
         st.switch_page("halaman/simulasi.py")
 
-# ---------- Cara kerja aplikasi ----------
+# Cara kerja aplikasi
 with st.container(key="kartu_proses"):
     st.subheader("Bagaimana aplikasi menghasilkan prediksi?")
     langkah = [
@@ -35,7 +35,7 @@ with st.container(key="kartu_proses"):
     st.caption("Keandalan setiap model diuji dengan menebak konsumsi kabupaten/kota yang tidak dipakai "
                "saat model belajar. Hasilnya dapat dilihat di halaman Evaluasi Kinerja Model.")
 
-# ---------- Contoh skenario ----------
+# Contoh skenario
 with st.container(border=True, key="kartu_contoh"):
     st.subheader(":material/lightbulb: Contoh penggunaan")
     st.markdown("Pemerintah suatu kabupaten berencana menurunkan persentase penduduk miskin dari 12% "
@@ -58,7 +58,7 @@ with st.container(border=True, key="kartu_contoh"):
     if st.button("Mulai Simulasi", type="primary", icon=":material/arrow_forward:"):
         st.switch_page("halaman/simulasi.py")
 
-# ---------- Penjelasan empat faktor ----------
+# Penjelasan empat faktor
 with st.container(key="kartu_faktor"):
     st.subheader("Mengenal empat faktor sosial ekonomi")
     st.markdown("Keempat faktor berikut adalah data yang diisi pada halaman Simulasi Prediksi. "
@@ -80,7 +80,7 @@ with st.container(key="kartu_faktor"):
                         f":material/arrow_upward: **Makin besar:** {info['besar']}")
             st.caption(f"Pada data penelitian: {data[f].min():g} sampai {data[f].max():g}.")
 
-# ---------- Hasil yang diperoleh ----------
+# Hasil yang diperoleh
 with st.container(border=True, key="kartu_hasil"):
     st.subheader(":material/restaurant: Hasil yang diperoleh")
     st.markdown("Aplikasi menghasilkan perkiraan **rata-rata konsumsi** "
@@ -91,7 +91,7 @@ with st.container(border=True, key="kartu_hasil"):
     k2.markdown("\n".join(f"- {d}" for d in daftar[4:8]))
     k3.markdown("\n".join(f"- {d}" for d in daftar[8:12]))
 
-# ---------- Isi halaman lain ----------
+# Isi halaman lain 
 with st.container(border=True, key="kartu_halaman"):
     st.subheader(":material/map: Halaman pada aplikasi")
     st.markdown(

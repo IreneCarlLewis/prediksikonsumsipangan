@@ -26,7 +26,7 @@ nilai = st.session_state["input"]
 klaster = st.session_state["klaster"]
 baris_fitur = st.session_state["baris_fitur"]
 
-# ---------- Ringkasan input ----------
+# Ringkasan input
 with st.container(border=True, key="kartu_nilai"):
     st.markdown("Nilai faktor yang diisi di halaman Simulasi Prediksi:")
     k1, k2, k3, k4 = st.columns(4)
@@ -88,7 +88,7 @@ with st.container(border=True, key="kartu_grafikshap"):
     turun = sosek[sosek["kontribusi"] < 0].sort_values("kontribusi")
     pangan = NAMA_PANGAN[target].lower()
 
-        # Kalimat 1: hasil prediksi dibandingkan rata-rata wilayah yang serupa
+    # Kalimat 1: hasil prediksi dibandingkan rata-rata wilayah yang serupa
     selisih = prediksi - nilai_dasar
     if abs(selisih) < 0.05 * abs(nilai_dasar):
         banding = "hampir sama dengan"

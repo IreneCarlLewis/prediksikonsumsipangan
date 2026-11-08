@@ -1,3 +1,4 @@
+import re
 from io import BytesIO
 
 import matplotlib.pyplot as plt
@@ -34,7 +35,7 @@ with st.container(border=True, key="kartu_input"):
         for kunci in ["input", "klaster", "baris_fitur", "prediksi"]:
             st.session_state.pop(kunci, None)
         st.session_state["pilihan_contoh"] = "Kosongkan (isi sendiri)"
-                # Nomor ini naik setiap tombol ditekan, supaya kotak isian selalu dibuat ulang dalam keadaan kosong
+        # Nomor ini naik setiap tombol ditekan, supaya kotak isian selalu dibuat ulang dalam keadaan kosong
         st.session_state["nomor_kosongkan"] = st.session_state.get("nomor_kosongkan", 0) + 1
 
 
@@ -47,27 +48,57 @@ with st.container(border=True, key="kartu_input"):
 
     
     def nilai_awal(fitur):
-        # Kotak dibiarkan kosong (None) untuk pilihan "Kosongkan (isi sendiri)"
-        return None if pd.isna(nilai_contoh[fitur]) else float(nilai_contoh[fitur])
+        # Isi awal kotak dalam bentuk teks. Kosong ("") untuk pilihan "Kosongkan (isi sendiri)"
+        return "" if pd.isna(nilai_contoh[fitur]) else f"{nilai_contoh[fitur]:.2f}"
 
-# ---------- Form input ----------
+
+def baca_angka(teks, batas_atas):
+    # Mengubah isian teks menjadi angka. Hasil: (angka, pesan salah)
+    # Titik dan koma sama-sama boleh. Pengguna hanya ditanya jika tulisannya bermakna ganda.
+    teks = teks.strip().replace(" ", "")                  # buang semua spasi
+    if teks == "":
+        return None, None                                 # kosong, nanti dianggap "belum diisi"
+
+    if re.fullmatch(r"\d+", teks):                        # 1622
+        return float(teks), None
+    if re.fullmatch(r"\d+[.,](\d{1,2}|\d{4,})", teks):    # 1622.33 / 1622,33 / 8,7 (bukan 3 angka)
+        return float(teks.replace(",", ".")), None
+    if re.fullmatch(r"\d{1,3}(\.\d{3})+,\d+", teks):      # 1.622,33 (gaya Indonesia)
+        return float(teks.replace(".", "").replace(",", ".")), None
+    if re.fullmatch(r"\d{1,3}(,\d{3})+\.\d+", teks):      # 1,622.33 (gaya Inggris)
+        return float(teks.replace(",", "")), None
+    if re.fullmatch(r"\d{1,3}([.,]\d{3}){2,}", teks) and len(set(re.sub(r"\d", "", teks))) == 1:
+        return float(re.sub(r"[.,]", "", teks)), None     # 1.234.567 (ribuan, tanpa desimal)
+
+    if re.fullmatch(r"\d+[.,]\d{3}", teks):               # 1.622 / 1,622: desimal atau ribuan?
+        desimal = float(teks.replace(",", "."))
+        ribuan = float(teks.replace(".", "").replace(",", ""))
+        if ribuan > batas_atas:                           # ribuan tidak mungkin, jadi pasti desimal
+            return desimal, None
+        bulat = teks.replace(",", "").replace(".", "")
+        return None, (f"ditulis {teks}. Apakah maksudnya {desimal:.2f} atau {bulat}? "
+                      f"Tulis {desimal:.2f} untuk desimal, atau {bulat} untuk ribuan")
+
+    return None, "harus berisi angka, contoh: 1622.33 atau 1622,33"
+
+# Form input
 with st.form("form_input", border=True):
-    st.caption("Gunakan **titik (.)** sebagai pemisah desimal, contoh: 8.74 (bukan 8,74).")
+    st.caption("Desimal boleh memakai titik atau koma, contoh: 1622.33 atau 1622,33.")
     kiri, kanan = st.columns(2)
-    kp = kiri.number_input(NAMA_FITUR_AWAM["Nilai_kp"],
-                           value=nilai_awal("Nilai_kp"), format="%.2f", placeholder="Isi sendiri",
+    kp = kiri.text_input(NAMA_FITUR_AWAM["Nilai_kp"],
+                           value=nilai_awal("Nilai_kp"), placeholder="Isi sendiri",
                            help=INFO_FAKTOR["Nilai_kp"]["apa"], key=f"kp_{pilihan}_{nomor}")
     kiri.caption(f"Rentang data: {teks_rentang('Nilai_kp')}")
-    ipm = kanan.number_input(NAMA_FITUR_AWAM["Nilai_ipm"],
-                             value=nilai_awal("Nilai_ipm"), format="%.2f", placeholder="Isi sendiri",
+    ipm = kanan.text_input(NAMA_FITUR_AWAM["Nilai_ipm"],
+                             value=nilai_awal("Nilai_ipm"), placeholder="Isi sendiri",
                              help=INFO_FAKTOR["Nilai_ipm"]["apa"], key=f"ipm_{pilihan}_{nomor}")
     kanan.caption(f"Rentang data: {teks_rentang('Nilai_ipm')}")
-    p0 = kiri.number_input(NAMA_FITUR_AWAM["P0"],
-                           value=nilai_awal("P0"), format="%.2f", placeholder="Isi sendiri",
+    p0 = kiri.text_input(NAMA_FITUR_AWAM["P0"],
+                           value=nilai_awal("P0"), placeholder="Isi sendiri",
                            help=INFO_FAKTOR["P0"]["apa"], key=f"p0_{pilihan}_{nomor}")
     kiri.caption(f"Rentang data: {teks_rentang('P0')}")
-    tpt = kanan.number_input(NAMA_FITUR_AWAM["Nilai_tpt"],
-                             value=nilai_awal("Nilai_tpt"), format="%.2f", placeholder="Isi sendiri",
+    tpt = kanan.text_input(NAMA_FITUR_AWAM["Nilai_tpt"],
+                             value=nilai_awal("Nilai_tpt"), placeholder="Isi sendiri",
                              help=INFO_FAKTOR["Nilai_tpt"]["apa"], key=f"tpt_{pilihan}_{nomor}")
     kanan.caption(f"Rentang data: {teks_rentang('Nilai_tpt')}")
     st.selectbox("Tahun acuan", [TAHUN_ACUAN], disabled=True,
@@ -80,7 +111,7 @@ with st.form("form_input", border=True):
         ditekan = st.form_submit_button("Prediksi", type="primary", icon=":material/calculate:")
         st.form_submit_button("Reset", icon=":material/restart_alt:", on_click=reset_form)
 
-# ---------- Proses saat tombol ditekan ----------
+# Proses saat tombol ditekan 
 if ditekan:
     # Cek isian dulu sebelum diprediksi
     kesalahan = []
@@ -92,13 +123,20 @@ if ditekan:
         "P0": ("Persentase penduduk miskin", "harus antara 0 dan 100%", lambda v: 0 <= v <= 100),
         "Nilai_tpt": ("Tingkat pengangguran", "harus antara 0 dan 100%", lambda v: 0 <= v <= 100),
     }
-    isian = {"Nilai_kp": kp, "Nilai_ipm": ipm, "P0": p0, "Nilai_tpt": tpt}
-    for fitur, nilai_isian in isian.items():
+    isian = {"Nilai_kp": kp, "Nilai_ipm": ipm, "P0": p0, "Nilai_tpt": tpt}   # masih berupa teks
+    angka = {}                                                               # hasil ubahan ke angka
+    batas_atas = {"Nilai_kp": 100000, "Nilai_ipm": 100, "P0": 100, "Nilai_tpt": 100}  # sama dengan aturan
+    for fitur, teks_isian in isian.items():
         nama, syarat, sesuai = aturan[fitur]
-        if nilai_isian is None:
+        nilai_isian, pesan = baca_angka(teks_isian, batas_atas[fitur])   # ubah teks menjadi angka
+        if pesan is not None:
+            kesalahan.append(f"{nama} {pesan}.")
+        elif nilai_isian is None:
             kesalahan.append(f"{nama} belum diisi. Nilainya {syarat}.")
         elif not sesuai(nilai_isian):
             kesalahan.append(f"{nama} {syarat}.")
+        else:
+            angka[fitur] = nilai_isian                     # simpan angka yang sudah benar
 
     if kesalahan:
         # Tampilkan pesan error dan hapus hasil lama supaya tidak membingungkan
@@ -108,8 +146,7 @@ if ditekan:
             st.session_state.pop(kunci, None)
     else:
         try:
-            nilai = {"Nilai_kp": round(kp, 2), "Nilai_ipm": round(ipm, 2),
-                     "P0": round(p0, 2), "Nilai_tpt": round(tpt, 2)}
+            nilai = {f: round(angka[f], 2) for f in ["Nilai_kp", "Nilai_ipm", "P0", "Nilai_tpt"]}
             klaster = tentukan_cluster(nilai)
             baris_fitur = pd.DataFrame([{**nilai, "Tahun": TAHUN_ACUAN}])
             # Disimpan di session_state supaya bisa dipakai halaman Interpretasi Lokal
@@ -124,7 +161,7 @@ if ditekan:
             for kunci in ["input", "klaster", "baris_fitur", "prediksi"]:
                 st.session_state.pop(kunci, None)
 
-# ---------- Tampilkan hasil (selama sudah pernah diprediksi) ----------
+# Tampilkan hasil (selama sudah pernah diprediksi) 
 if "prediksi" in st.session_state:
     nilai = st.session_state["input"]
     klaster = st.session_state["klaster"]
@@ -145,7 +182,7 @@ if "prediksi" in st.session_state:
             kolom = st.columns(4)
             for i, f in enumerate(["Nilai_kp", "Nilai_ipm", "P0", "Nilai_tpt"]):
                 satuan = "%" if f in ("P0", "Nilai_tpt") else ""
-                kolom[i].metric(NAMA_FITUR[f], f"{nilai[f]:g}{satuan}", border=True)
+                kolom[i].metric(NAMA_FITUR[f], f"{nilai[f]:.2f}{satuan}", border=True)
                 kolom[i].caption(keterangan_nilai(f, nilai[f]))
             st.markdown(f"Termasuk **{nama_kelompok(klaster)}**: {KETERANGAN_KELOMPOK[klaster]}")
         penjelasan_kelompok_wilayah()

@@ -55,7 +55,7 @@ with st.container(border=True, key="kartu_evaluasi"):
 # Tabel 12 pangan: R² dan RMSE RF vs RLB 
 with st.container(border=True, key="kartu_tabel"):
     lebar = bagian.pivot_table(index="target", columns="model", values=["R2", "RMSE"])
-    lebar = lebar.reindex(TARGET)                                  # urutan pangan tetap
+    lebar = lebar.reindex(TARGET) # urutan pangan tetap
     tabel = {
         "Kelompok Pangan": [NAMA_PANGAN[t] for t in TARGET],
         "R² RF": lebar[("R2", "RF")].values,
@@ -68,13 +68,13 @@ with st.container(border=True, key="kartu_tabel"):
 
 # Grafik R² RF vs RLB 
 with st.container(border=True, key="grafik"):
-    posisi = np.arange(len(TARGET))                                # posisi baris 0..11
+    posisi = np.arange(len(TARGET)) # posisi baris 0..11
     fig, ax = plt.subplots(figsize=(6.5, 5))
     ax.barh(posisi - 0.18, tabel["R² RF"], height=0.36, color="#3B4556", label="Random Forest")
     ax.barh(posisi + 0.18, tabel["R² RLB"], height=0.36, color="#BCC3CE", label="Regresi Linear Berganda")
     ax.set_yticks(posisi, tabel["Kelompok Pangan"])
-    ax.invert_yaxis()                                              # pangan pertama di atas
-    ax.axvline(0, color="#374151", linewidth=0.8)                  # garis nol
+    ax.invert_yaxis() # pangan pertama di atas
+    ax.axvline(0, color="#374151", linewidth=0.8) # garis nol
     ax.set_xlabel("R²")
     ax.set_title(f"R² Random Forest vs Regresi Linear Berganda\n{nama_kelompok(klaster)}")
     ax.legend(loc="lower right", fontsize=7)
