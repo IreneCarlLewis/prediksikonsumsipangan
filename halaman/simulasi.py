@@ -55,19 +55,19 @@ with st.form("form_input", border=True):
     st.caption("Gunakan **titik (.)** sebagai pemisah desimal, contoh: 8.74 (bukan 8,74).")
     kiri, kanan = st.columns(2)
     kp = kiri.number_input(NAMA_FITUR_AWAM["Nilai_kp"],
-                           value=float(nilai_contoh["Nilai_kp"]), format="%.2f", placeholder="Isi sendiri",
+                           value=nilai_awal("Nilai_kp"), format="%.2f", placeholder="Isi sendiri",
                            help=INFO_FAKTOR["Nilai_kp"]["apa"], key=f"kp_{pilihan}_{nomor}")
     kiri.caption(f"Rentang data: {teks_rentang('Nilai_kp')}")
     ipm = kanan.number_input(NAMA_FITUR_AWAM["Nilai_ipm"],
-                             value=float(nilai_contoh["Nilai_ipm"]), format="%.2f", placeholder="Isi sendiri",
+                             value=nilai_awal("Nilai_ipm"), format="%.2f", placeholder="Isi sendiri",
                              help=INFO_FAKTOR["Nilai_ipm"]["apa"], key=f"ipm_{pilihan}_{nomor}")
     kanan.caption(f"Rentang data: {teks_rentang('Nilai_ipm')}")
     p0 = kiri.number_input(NAMA_FITUR_AWAM["P0"],
-                           value=float(nilai_contoh["P0"]), format="%.2f", placeholder="Isi sendiri",
+                           value=nilai_awal("P0"), format="%.2f", placeholder="Isi sendiri",
                            help=INFO_FAKTOR["P0"]["apa"], key=f"p0_{pilihan}_{nomor}")
     kiri.caption(f"Rentang data: {teks_rentang('P0')}")
     tpt = kanan.number_input(NAMA_FITUR_AWAM["Nilai_tpt"],
-                             value=float(nilai_contoh["Nilai_tpt"]), format="%.2f", placeholder="Isi sendiri",
+                             value=nilai_awal("Nilai_tpt"), format="%.2f", placeholder="Isi sendiri",
                              help=INFO_FAKTOR["Nilai_tpt"]["apa"], key=f"tpt_{pilihan}_{nomor}")
     kanan.caption(f"Rentang data: {teks_rentang('Nilai_tpt')}")
     st.selectbox("Tahun acuan", [TAHUN_ACUAN], disabled=True,
@@ -89,8 +89,8 @@ if ditekan:
         "Nilai_kp": ("Kepadatan penduduk", "harus lebih dari 0 dan paling besar 100.000 jiwa/km²",
                      lambda v: 0 < v <= 100000),
         "Nilai_ipm": ("IPM", "harus lebih dari 0 dan paling besar 100", lambda v: 0 < v <= 100),
-        "P0": ("Persentase penduduk miskin", "harus antara 0 dan 100%", lambda v: 0 < v <= 100),
-        "Nilai_tpt": ("Tingkat pengangguran", "harus antara 0 dan 100%", lambda v: 0 < v <= 100),
+        "P0": ("Persentase penduduk miskin", "harus antara 0 dan 100%", lambda v: 0 <= v <= 100),
+        "Nilai_tpt": ("Tingkat pengangguran", "harus antara 0 dan 100%", lambda v: 0 <= v <= 100),
     }
     isian = {"Nilai_kp": kp, "Nilai_ipm": ipm, "P0": p0, "Nilai_tpt": tpt}
     for fitur, nilai_isian in isian.items():

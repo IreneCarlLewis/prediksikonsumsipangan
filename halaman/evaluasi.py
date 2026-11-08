@@ -50,7 +50,7 @@ with st.container(border=True, key="kartu_evaluasi"):
                 kalimat += f"Hasil ini lebih baik daripada Regresi Linear Berganda (R² {rlb['R2']:.2f})."
         else:
                 kalimat += f"Hasil ini belum lebih baik daripada Regresi Linear Berganda (R² {rlb['R2']:.2f})."
-        st.info(kalimat)
+    st.info(kalimat)
 
 # Tabel 12 pangan: R² dan RMSE RF vs RLB 
 with st.container(border=True, key="kartu_tabel"):
