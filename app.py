@@ -2,8 +2,10 @@ import streamlit as st
 
 st.set_page_config(page_title="Prediksi Konsumsi Pangan", layout="wide")
 
-beranda = st.Page("halaman/beranda.py", title="Beranda", icon=":material/home:", default=True)
-simulasi = st.Page("halaman/simulasi.py", title="Simulasi Prediksi", icon=":material/tune:")
+beranda = st.Page("halaman/beranda.py", title="Beranda", 
+                  icon=":material/home:", default=True)
+simulasi = st.Page("halaman/simulasi.py", title="Simulasi Prediksi", 
+                   icon=":material/tune:")
 lokal = st.Page("halaman/interpretasi_lokal.py", title="Interpretasi Lokal",
                 icon=":material/search_insights:")
 evaluasi = st.Page("halaman/evaluasi.py", title="Evaluasi Kinerja Model",
