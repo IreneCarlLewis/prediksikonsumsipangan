@@ -208,17 +208,35 @@ if "prediksi" in st.session_state:
         st.caption("Ketepatan prediksi berbeda-beda untuk setiap kelompok pangan. Hasil pengujian "
                    "model dapat dilihat di halaman Evaluasi Kinerja Model.")
 
-        # Grafik hanya untuk pangan bersatuan Kg, supaya panjang batang bisa dibandingkan
-        kg = prediksi[prediksi["Satuan"] == "Kg"].sort_values("Prediksi Konsumsi")
-        fig, ax = plt.subplots(figsize=(6.5, 2.8))
-        ax.barh(kg["Kelompok Pangan"], kg["Prediksi Konsumsi"], color="#5E9C76", height=0.6)
-        ax.set_title("Prediksi konsumsi, kelompok pangan bersatuan kilogram")
-        ax.set_xlabel("Prediksi konsumsi (Kg)")
-        gaya_grafik(ax)
-        st.pyplot(fig, width=700)
-        plt.close(fig)
-        st.caption("Grafik hanya memuat kelompok pangan bersatuan kilogram agar dapat dibandingkan. "
-                   "Kelompok pangan lain (telur, minyak, kelapa, bumbu-bumbuan) ditampilkan pada tabel.")
+        # Grafik per satuan. Gram diubah ke Kg dan 100 ml diubah ke Liter,
+        # supaya satuan yang sejenis (berat dengan berat, volume dengan volume) ada di satu grafik
+        grafik = prediksi.copy()                                   # salinan, tabel di atas tidak berubah
+        gram = grafik["Satuan"] == "Gram"
+        grafik.loc[gram, "Prediksi Konsumsi"] = grafik.loc[gram, "Prediksi Konsumsi"] / 1000   # 1 kg = 1.000 gram
+        grafik.loc[gram, "Satuan"] = "Kg"
+        ml = grafik["Satuan"] == "× 100 ml"
+        grafik.loc[ml, "Prediksi Konsumsi"] = grafik.loc[ml, "Prediksi Konsumsi"] / 10         # 100 ml = 0,1 liter
+        grafik.loc[ml, "Satuan"] = "Liter"
+        grafik.loc[gram | ml, "Kelompok Pangan"] = grafik.loc[gram | ml, "Kelompok Pangan"] + "*"  # tanda hasil ubahan
+
+        judul = {"Kg": "Kilogram", "Butir": "Butir", "Liter": "Liter"}
+        for satuan in ["Kg", "Butir", "Liter"]:                    # satu grafik untuk setiap satuan
+            bagian = grafik[grafik["Satuan"] == satuan].sort_values("Prediksi Konsumsi")
+            tinggi = 0.35 * len(bagian) + 0.9                          # tinggi mengikuti jumlah batang
+            fig, ax = plt.subplots(figsize=(6.5, tinggi))
+            fig.subplots_adjust(left=0.24, right=0.97, bottom=0.5 / tinggi, top=1 - 0.3 / tinggi)  # tepi sama untuk semua grafik
+            batang = ax.barh(bagian["Kelompok Pangan"], bagian["Prediksi Konsumsi"], color="#5E9C76", height=0.6)
+            ax.bar_label(batang, fmt="%.3f", padding=3, fontsize=8)   # angka di ujung batang
+            ax.set_xlim(0, bagian["Prediksi Konsumsi"].max() * 1.15)  # ruang untuk angka
+            ax.set_title(f"Prediksi Konsumsi Kelompok Pangan Bersatuan {judul[satuan]}")
+            ax.set_xlabel(f"Prediksi Konsumsi ({satuan})")
+            gaya_grafik(ax)
+            st.pyplot(fig, width=700, bbox_inches=None)               # tanpa dipotong, supaya ukuran huruf sama
+            plt.close(fig)
+        st.caption("Setiap grafik hanya memuat kelompok pangan dengan satuan yang sama agar dapat "
+                   "dibandingkan. Tanda * berarti satuannya diubah untuk grafik: bumbu-bumbuan padat "
+                   "dari gram ke kg (dibagi 1.000) dan bumbu-bumbuan cair dari 100 ml ke liter "
+                   "(dibagi 10). Tabel di atas tetap memakai satuan asli.")
 
         
         st.caption("Hasil merupakan perkiraan model berdasarkan pola data tahun 2022–2025, bukan data "

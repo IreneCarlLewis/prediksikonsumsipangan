@@ -75,7 +75,8 @@ with st.container(border=True, key="kartu_tujuan"):
     kiri_batang = np.zeros(len(TARGET)) # titik awal tiap segmen
     for f in URUTAN_FAKTOR:
         nilai = persen[f].values
-        batang = ax.barh(posisi, nilai, left=kiri_batang, color=WARNA_FAKTOR[f], height=0.75)
+        batang = ax.barh(posisi, nilai, left=kiri_batang, color=WARNA_FAKTOR[f], height=0.75,
+                         label=NAMA_FITUR_LENGKAP[f])   # nama faktor untuk legend
         # Tulis persen di dalam segmen kalau cukup lebar (>= 8%)
         label = [f"{v:.0f}%" if v >= 8 else "" for v in nilai]
         ax.bar_label(batang, labels=label, label_type="center", fontsize=6.5,
@@ -88,6 +89,8 @@ with st.container(border=True, key="kartu_tujuan"):
     ax.get_yticklabels()[baris_pilih].set_fontweight("bold")
     ax.invert_yaxis()
     ax.set_xlim(0, 100)
+    ax.legend(loc="lower center", bbox_to_anchor=(0.5, 1.01), ncol=5, frameon=False,
+              fontsize=7, handlelength=1.2, columnspacing=1.2)   # legend satu baris di atas grafik
     ax.set_xlabel("Persentase kontribusi (%)")
     gaya_grafik(ax)
     ax.grid(False)
